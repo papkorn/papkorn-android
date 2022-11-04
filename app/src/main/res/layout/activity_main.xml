@@ -17,10 +17,10 @@
             android:id="@+id/text_show_movies"
             android:layout_width="92dp"
             android:layout_height="36dp"
+            android:background="@drawable/button_primary"
             android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:text="فیلم"
-            android:background="@drawable/button_primary"
             android:textColor="@color/white"
             android:textSize="@dimen/text_small" />
 
@@ -33,26 +33,43 @@
             android:text="سریال"
             android:textColor="@color/white"
             android:textSize="@dimen/text_small" />
+
         <View
-            android:layout_gravity="center"
-            android:layout_weight="1"
             android:layout_width="wrap_content"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_gravity="center"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/button_search"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/button_primary"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:src="@drawable/ic_search"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_xsmall" />
 
         <TextView
-            android:clickable="true"
-            android:paddingEnd="12dp"
-            android:paddingStart="12dp"
             android:id="@+id/text_show_all"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
+            android:background="@drawable/button_primary"
+            android:clickable="true"
+            android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
-            android:background="@drawable/button_primary"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
             android:text="همه فیلم‌ها"
             android:textColor="@color/white"
             android:textSize="@dimen/text_xsmall"
-            android:focusable="true"
             app:drawableStartCompat="@drawable/ic_baseline_eye" />
 
     </LinearLayout>
@@ -60,14 +77,16 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:backgroundTint="@color/primary"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/primary">
+
             <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:layout_width="match_parent"
-                app:layout_scrollFlags="scroll|enterAlways"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:layout_scrollFlags="scroll|enterAlways">
 
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tab_layout"
@@ -76,8 +95,8 @@
                     android:layout_margin="8dp"
                     android:animateLayoutChanges="true"
                     android:background="@color/primary"
-                    app:tabGravity="fill"
                     app:tabBackground="@drawable/test_drawable"
+                    app:tabGravity="fill"
                     app:tabIndicator="@drawable/tab_indicator"
                     app:tabIndicatorAnimationMode="elastic"
                     app:tabIndicatorGravity="stretch"
@@ -92,16 +111,11 @@
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/view_pager"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-
-
-
-
 
 
 </LinearLayout>

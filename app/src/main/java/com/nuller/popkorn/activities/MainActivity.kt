@@ -5,6 +5,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
@@ -30,6 +31,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
     private lateinit var textShowMovies: TextView
     private lateinit var textShowSeries: TextView
     private lateinit var textShowAll: TextView
+    private lateinit var buttonSearch: ImageButton
     private var type = TYPE_MOVIES
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,12 +43,17 @@ class MainActivity : BaseActivity(), View.OnClickListener {
         textShowMovies = findViewById(R.id.text_show_movies)
         textShowSeries = findViewById(R.id.text_show_series)
         textShowAll = findViewById(R.id.text_show_all)
+        buttonSearch = findViewById(R.id.button_search)
 
         textShowMovies.setOnClickListener(this)
         textShowSeries.setOnClickListener(this)
         textShowAll.setOnClickListener(this)
 
         myTabsAdapter = TabsAdapter(supportFragmentManager)
+
+        buttonSearch.setOnClickListener {
+            startActivity(Intent(context, SearchActivity::class.java))
+        }
 
         getHomePage(type)
 

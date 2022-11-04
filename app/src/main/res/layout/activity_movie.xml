@@ -151,6 +151,7 @@
                     android:drawableRight="@drawable/ic_play"
                     android:paddingRight="16dp"
                     android:drawableTint="@color/black"
+                    android:id="@+id/button_play"
                     android:text="تماشای آنلاین"
                     android:textColor="@color/black" />
                 <androidx.appcompat.widget.AppCompatButton
@@ -222,6 +223,7 @@
                     </androidx.viewpager.widget.ViewPager>
 
                     <ImageView
+                        android:visibility="gone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
@@ -229,6 +231,7 @@
                         android:src="@drawable/ic_baseline_keyboard_arrow_right_24" />
 
                     <ImageView
+                        android:visibility="gone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
@@ -256,11 +259,13 @@
                         android:orientation="horizontal">
 
                         <ImageView
+                            android:visibility="gone"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_baseline_keyboard_arrow_left_24" />
 
                         <ImageView
+                            android:visibility="gone"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_baseline_keyboard_arrow_right_24" />
@@ -306,11 +311,13 @@
                         android:orientation="horizontal">
 
                         <ImageView
+                            android:visibility="gone"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_baseline_keyboard_arrow_left_24" />
 
                         <ImageView
+                            android:visibility="gone"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_baseline_keyboard_arrow_right_24" />

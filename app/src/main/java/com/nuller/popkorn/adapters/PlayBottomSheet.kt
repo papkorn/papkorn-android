@@ -1,21 +1,19 @@
 package com.nuller.popkorn.adapters
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.app.DownloadManager
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -24,6 +22,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.jaredrummler.materialspinner.MaterialSpinner
 import com.nuller.popkorn.R
 import com.nuller.popkorn.activities.BaseActivity
+import com.nuller.popkorn.activities.TestActivity
 import com.nuller.popkorn.fragments.BaseFragment
 import com.nuller.popkorn.reponses.ResponseMovieLinksItem
 import com.nuller.popkorn.reponses.ResponseMovieSubtitlesItem
@@ -34,26 +33,27 @@ import com.nuller.popkorn.utils.Params
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.StringBuilder
 import java.util.*
 
-class DownloadBottomSheet(
+class PlayBottomSheet(
     private val movieType: String,
     private val imdbId: Int,
     private val api: API
 ) :
     BottomSheetDialogFragment() {
 
-    private lateinit var linksAdapter: LinksAdapter
-    private lateinit var subtitlesAdapter: SubtitlesAdapter
-    private lateinit var recyclerLinks: RecyclerView
-    private lateinit var recyclerSubtitles: RecyclerView
-    private lateinit var loadingEpisodes: ProgressBar
-    private lateinit var loadingLinks: ProgressBar
-    private lateinit var loadingSubtitles: ProgressBar
+    private lateinit var buttonPlay: Button
     private lateinit var spinnerSeasons: MaterialSpinner
     private lateinit var spinnerEpisodes: MaterialSpinner
+    private lateinit var spinnerLinks: MaterialSpinner
+    private lateinit var spinnerSubtitles: MaterialSpinner
     private var seasonsTitles = arrayListOf<String>()
     private var episodesTitles = arrayListOf<String>()
+    private var linksTitles = arrayListOf<String>()
+    private var subtitlesTitles = arrayListOf<String>()
+    private var links = arrayListOf<ResponseMovieLinksItem>()
+    private var subtitles = arrayListOf<ResponseMovieSubtitlesItem>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,14 +61,12 @@ class DownloadBottomSheet(
         savedInstanceState: Bundle?
     ): View? {
 
-        val view = inflater.inflate(R.layout.sheet_download, container, false)
-        recyclerLinks = view.findViewById(R.id.recycler_links)
-        recyclerSubtitles = view.findViewById(R.id.recycler_subtitles)
-        loadingLinks = view.findViewById(R.id.progress_loading_links)
-        loadingEpisodes = view.findViewById(R.id.progress_loading_episodes)
-        loadingSubtitles = view.findViewById(R.id.progress_loading_subtitles)
+        val view = inflater.inflate(R.layout.sheet_play, container, false)
+        buttonPlay = view.findViewById(R.id.button_play)
         spinnerSeasons = view.findViewById(R.id.spinner_seasons)
         spinnerEpisodes = view.findViewById(R.id.spinner_episodes)
+        spinnerLinks = view.findViewById(R.id.spinner_links)
+        spinnerSubtitles = view.findViewById(R.id.spinner_subtitles)
 
         when (movieType) {
             Params.TYPE_MOVIES -> {
@@ -96,6 +94,30 @@ class DownloadBottomSheet(
             )
         }
 
+        buttonPlay.setOnClickListener {
+            var videoUrl = ""
+            var subtitleUrl = ""
+            val videoIntent = Intent(context, TestActivity::class.java)
+
+            if (links.isNotEmpty()) {
+                val video = links[spinnerLinks.selectedIndex]
+                if (video.isSoftsub!!) {
+                    videoUrl = video.mainUrl + video.uri
+                } else if (subtitles.isNotEmpty()) {
+                    videoUrl = video.mainUrl + video.uri
+                    subtitleUrl = subtitles[spinnerSubtitles.selectedIndex].uri
+                }else{
+                    videoUrl = video.mainUrl + video.uri
+
+                }
+            }
+            println("videoIntent : $videoUrl")
+            println("videoIntent : $subtitleUrl")
+            videoIntent.putExtra("video", videoUrl)
+            videoIntent.putExtra("subtitle", subtitleUrl)
+            startActivity(videoIntent)
+        }
+
         return view
 
     }
@@ -110,7 +132,6 @@ class DownloadBottomSheet(
                 ) {
                     val seasons = response.body()
                     for (season in seasons!!) {
-//                        println(" فصل ${season.seasonNo}")
                         if (season.seasonNo != -1 && season.seasonNo != 0)
                             seasonsTitles.add(" فصل ${season.seasonNo}")
                     }
@@ -124,9 +145,8 @@ class DownloadBottomSheet(
     }
 
     private fun getEpisodes(imdbId: Int, seasonNumber: Int) {
-        loadingEpisodes.visibility = View.VISIBLE
         spinnerEpisodes.visibility = View.INVISIBLE
-        spinnerEpisodes.selectedIndex = 0
+        if (episodesTitles.isNotEmpty()) spinnerEpisodes.selectedIndex = 0
         episodesTitles.clear()
         api.getSerieEpisodes(imdbId, seasonNumber)
             .enqueue(object : Callback<List<ResponseSerieEpisodesItem>> {
@@ -135,20 +155,22 @@ class DownloadBottomSheet(
                     response: Response<List<ResponseSerieEpisodesItem>>
                 ) {
                     val episodes = response.body()
-                    for (episode in episodes!!) {
-                        if (episode.episodeNo != -1 && episode.episodeNo != 0)
-                            episodesTitles.add(" قسمت ${episode.episodeNo}")
+                    if (response.code() == 200) {
+                        for (episode in episodes!!) {
+                            if (episode.episodeNo != -1 && episode.episodeNo != 0)
+                                episodesTitles.add(" قسمت ${episode.episodeNo}")
 
-                        println(" قسمت ${episode.episodeNo}")
-                        loadingEpisodes.visibility = View.GONE
-                        spinnerEpisodes.visibility = View.VISIBLE
+                            println(" قسمت ${episode.episodeNo}")
+                            spinnerEpisodes.visibility = View.VISIBLE
 
+                        }
+                        spinnerEpisodes.setItems(episodesTitles)
+                        getSerieLinks(
+                            imdbId,
+                            spinnerSeasons.selectedIndex + 1, 1
+                        )
                     }
-                    spinnerEpisodes.setItems(episodesTitles)
-                    getSerieLinks(
-                        imdbId,
-                        spinnerSeasons.selectedIndex + 1, 1
-                    )
+
                 }
 
                 override fun onFailure(call: Call<List<ResponseSerieEpisodesItem>>, t: Throwable) {
@@ -158,72 +180,10 @@ class DownloadBottomSheet(
             })
     }
 
-    private fun getMovieLinks(imdb: Int) {
-        loadingLinks.visibility = View.VISIBLE
-        api.getMovieLinks(imdb)
-            .enqueue(object : Callback<List<ResponseMovieLinksItem>> {
-                override fun onResponse(
-                    call: Call<List<ResponseMovieLinksItem>>,
-                    response: Response<List<ResponseMovieLinksItem>>
-                ) {
-                    if (response.code() == 200) {
-                        val data = response.body()
-                        linksAdapter = LinksAdapter(data!!,
-                            object : OnClick {
-                                override fun onClick(position: Int) {
-                                    val link = data[position]
-                                    startDownload(link.mainUrl + link.uri)
-                                }
-                            })
-                        recyclerLinks.layoutManager = LinearLayoutManager(activity)
-                        recyclerLinks.adapter = linksAdapter
-                        getMovieSubtitles(imdbId)
-
-                    }
-                    loadingLinks.visibility = View.GONE
-
-                }
-
-                override fun onFailure(call: Call<List<ResponseMovieLinksItem>>, t: Throwable) {
-                    TODO("Not yet implemented")
-                }
-
-            })
-    }
-
-    private fun getMovieSubtitles(imdbId: Int) {
-        api.getMovieSubtitles(imdbId)
-            .enqueue(object : Callback<List<ResponseMovieSubtitlesItem>> {
-                override fun onResponse(
-                    call: Call<List<ResponseMovieSubtitlesItem>>,
-                    response: Response<List<ResponseMovieSubtitlesItem>>
-                ) {
-                    if (response.code() == 200) {
-                        val data = response.body()
-                        subtitlesAdapter = SubtitlesAdapter(data!!, object : OnClick {
-                            override fun onClick(position: Int) {
-                                val link = data[position]
-                                startDownload(link.uri)
-                            }
-
-                        })
-                        recyclerSubtitles.layoutManager = LinearLayoutManager(activity)
-                        recyclerSubtitles.adapter = subtitlesAdapter
-
-                    }
-                    loadingSubtitles.visibility = View.GONE
-
-
-                }
-
-                override fun onFailure(call: Call<List<ResponseMovieSubtitlesItem>>, t: Throwable) {
-                    TODO("Not yet implemented")
-                }
-            })
-    }
-
     private fun getSerieLinks(imdbId: Int, seasonNumber: Int, episodeNumber: Int) {
-        loadingLinks.visibility = View.VISIBLE
+        if (linksTitles.isNotEmpty()) spinnerLinks.selectedIndex = 0
+        linksTitles.clear()
+        links.clear()
         api.getSerieLinks(imdbId, seasonNumber, episodeNumber)
             .enqueue(object : Callback<List<ResponseMovieLinksItem>> {
                 override fun onResponse(
@@ -232,15 +192,22 @@ class DownloadBottomSheet(
                 ) {
                     if (response.code() == 200) {
                         val data = response.body()
-                        linksAdapter = LinksAdapter(data!!,
-                            object : OnClick {
-                                override fun onClick(position: Int) {
-                                    val link = data[position]
-                                    startDownload(link.mainUrl + link.uri)
-                                }
-                            })
-                        recyclerLinks.layoutManager = LinearLayoutManager(activity)
-                        recyclerLinks.adapter = linksAdapter
+                        for (link in data!!) {
+                            val str = StringBuilder("${link.resolution!!} ${link.quality}")
+                            if (link.encoder != null) {
+                                str.append(" ${link.encoder}")
+                            }
+                            if (link.isDubbed!!) {
+                                str.append(" دوبله")
+                            }
+                            if (link.isSoftsub!!) {
+                                str.append(" زیرنویس چسبیده")
+                            }
+                            linksTitles.add(str.toString())
+
+                        }
+                        links.addAll(data)
+                        spinnerLinks.setItems(linksTitles)
 
                         getSerieSubtitles(
                             imdbId,
@@ -249,7 +216,6 @@ class DownloadBottomSheet(
                         )
 
                     }
-                    loadingLinks.visibility = View.GONE
 
                 }
 
@@ -261,6 +227,9 @@ class DownloadBottomSheet(
     }
 
     private fun getSerieSubtitles(imdbId: Int, seasonNumber: Int, episodeNumber: Int) {
+        if (subtitlesTitles.isNotEmpty()) spinnerSubtitles.selectedIndex = 0
+        subtitlesTitles.clear()
+        subtitles.clear()
         api.getSerieSubtitles(imdbId, seasonNumber, episodeNumber)
             .enqueue(object : Callback<List<ResponseMovieSubtitlesItem>> {
                 override fun onResponse(
@@ -268,20 +237,18 @@ class DownloadBottomSheet(
                     response: Response<List<ResponseMovieSubtitlesItem>>
                 ) {
                     if (response.code() == 200) {
+                        println(call.request().url())
                         val data = response.body()
-
-                        subtitlesAdapter = SubtitlesAdapter(data!!, object : OnClick {
-                            override fun onClick(position: Int) {
-                                val link = data[position]
-                                startDownload(link.uri)
-                            }
-
-                        })
-                        recyclerSubtitles.layoutManager = LinearLayoutManager(activity)
-                        recyclerSubtitles.adapter = subtitlesAdapter
+                        for (subtitle in data!!) {
+                            var str =
+                                "${subtitle.quality} ${subtitle.resolution} ${subtitle.author}"
+//                            if (subtitle.extraInfo.desc != null) str += " ${subtitle.extraInfo.desc}"
+                            subtitlesTitles.add(str)
+                        }
+                        subtitles.addAll(data)
+                        spinnerSubtitles.setItems(subtitlesTitles)
 
                     }
-                    loadingSubtitles.visibility = View.GONE
 
 
                 }
@@ -293,37 +260,73 @@ class DownloadBottomSheet(
 
     }
 
+    private fun getMovieLinks(imdb: Int) {
+        links.clear()
+        api.getMovieLinks(imdb)
+            .enqueue(object : Callback<List<ResponseMovieLinksItem>> {
+                override fun onResponse(
+                    call: Call<List<ResponseMovieLinksItem>>,
+                    response: Response<List<ResponseMovieLinksItem>>
+                ) {
+                    if (response.code() == 200) {
+                        val data = response.body()
+                        for (link in data!!) {
+                            val str = StringBuilder("${link.resolution!!} ${link.quality}")
+                            if (link.encoder != null) {
+                                str.append(" ${link.encoder}")
+                            }
+                            if (link.isDubbed!!) {
+                                str.append(" دوبله")
+                            }
+                            if (link.isSoftsub!!) {
+                                str.append(" زیرنویس چسبیده")
+                            }
+                            links.addAll(data)
+                            linksTitles.add(str.toString())
+                            spinnerLinks.setItems(linksTitles)
 
-    private fun startDownload(url: String) {
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) ==
-            PackageManager.PERMISSION_DENIED
-        ) {
-            Toast.makeText(context, "مجوز نوشتن کارت حافظه را تایید نمایید", Toast.LENGTH_LONG).show()
+                        }
 
-        } else {
-            Toast.makeText(context, "درحال دانلود", Toast.LENGTH_LONG).show()
-//        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        getMovieSubtitles(imdbId)
 
-            var fileName = url.substring(url.lastIndexOf('/') + 1)
-            fileName =
-                fileName.substring(0, 1).uppercase(Locale.getDefault()) + fileName.substring(1)
-            val request = DownloadManager.Request(Uri.parse(url))
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED) // Visibility of the download Notification
-                .setDestinationInExternalPublicDir(
-                    Environment.DIRECTORY_DOWNLOADS,
-                    fileName
-                )
-                .setTitle(fileName)
-                .setDescription(getString(R.string.app_name))
-                .setAllowedOverMetered(true)
-                .setAllowedOverRoaming(true)
-            val downloadManager =
-                context?.getSystemService(AppCompatActivity.DOWNLOAD_SERVICE) as DownloadManager
-            downloadManager.enqueue(request)
-        }
+                    }
+                }
 
+                override fun onFailure(call: Call<List<ResponseMovieLinksItem>>, t: Throwable) {
+                    TODO("Not yet implemented")
+                }
+
+            })
     }
+
+    private fun getMovieSubtitles(imdbId: Int) {
+        subtitles.clear()
+        api.getMovieSubtitles(imdbId)
+            .enqueue(object : Callback<List<ResponseMovieSubtitlesItem>> {
+                override fun onResponse(
+                    call: Call<List<ResponseMovieSubtitlesItem>>,
+                    response: Response<List<ResponseMovieSubtitlesItem>>
+                ) {
+                    if (response.code() == 200) {
+                        val data = response.body()
+                        for (subtitle in data!!) {
+                            var str =
+                                "${subtitle.quality} ${subtitle.resolution} ${subtitle.author}"
+//                            if (subtitle.extraInfo.desc != null) str += " ${subtitle.extraInfo.desc}"
+                            subtitlesTitles.add(str)
+                        }
+                        subtitles.addAll(data)
+                        spinnerSubtitles.setItems(subtitlesTitles)
+
+                    }
+
+                }
+
+                override fun onFailure(call: Call<List<ResponseMovieSubtitlesItem>>, t: Throwable) {
+                    TODO("Not yet implemented")
+                }
+            })
+    }
+
+
 }

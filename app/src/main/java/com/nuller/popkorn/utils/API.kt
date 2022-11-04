@@ -8,8 +8,8 @@ import retrofit2.http.*
 interface API {
     companion object {
         //        const val BASE_URL = "https://api.papkornbot.ir/api/"
-//        const val BASE_URL = "https://api.pkdirectdl.xyz/api/"
-        const val BASE_URL = "https://papkorn.3sigma.ir/api/"
+        const val BASE_URL = "https://api.pkdirectdl.xyz/api/"
+//        const val BASE_URL = "https://papkorn.3sigma.ir/api/"
         const val ACCEPT_TYPE = "application/json"
         const val CSRF_TOKEN = "bnZyOewsJchpvDINhswdNZ8X02MmG4HWBl7LT1UKdUCKFFwCX9bulgTr9s6JtNWi"
     }
@@ -98,5 +98,12 @@ interface API {
         @Path("imdb_id") imdbId: Int,
         @Query("season_no") seasonNumber: Int
     ): Call<List<ResponseSerieEpisodesItem>>
+
+    @GET("{type}/?ordering=-year")
+    @Headers("accept:$ACCEPT_TYPE,X-CSRFToken:$CSRF_TOKEN")
+    fun search(
+        @Path("type") movieType: String,
+        @Query("search") search: String
+    ) : Call<ResponseMovieByUrl>
 
 }

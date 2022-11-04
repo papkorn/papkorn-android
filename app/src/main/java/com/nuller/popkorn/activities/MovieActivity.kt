@@ -1,11 +1,14 @@
 package com.nuller.popkorn.activities
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,6 +43,7 @@ class MovieActivity : BaseActivity() {
     private lateinit var recyclerSimilar: RecyclerView
     private lateinit var recyclerRecommend: RecyclerView
     private lateinit var buttonDownload: Button
+    private lateinit var buttonPlay: Button
 
 
     private lateinit var recyclerRecommendAdapter: MovieAdapter
@@ -56,6 +60,8 @@ class MovieActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movie)
 
+        checkPermission()
+
         bundle = intent.extras!!
         imdbId = bundle.getInt("imdb_id")
         movieType = bundle.getString("type")!!
@@ -70,11 +76,16 @@ class MovieActivity : BaseActivity() {
         recyclerSimilar = findViewById(R.id.recycler_movie_similar)
         recyclerRecommend = findViewById(R.id.recycler_movie_recommend)
         buttonDownload = findViewById(R.id.button_download)
-
+        buttonPlay = findViewById(R.id.button_play)
 
         buttonDownload.setOnClickListener {
             val downloadBottomSheet = DownloadBottomSheet(movieType, imdbId, api)
             downloadBottomSheet.show(supportFragmentManager, "downloadBottomSheet")
+
+        }
+        buttonPlay.setOnClickListener {
+            val playBottomSheet = PlayBottomSheet(movieType, imdbId, api)
+            playBottomSheet.show(supportFragmentManager, "playBottomSheet")
 
         }
 
@@ -252,4 +263,19 @@ class MovieActivity : BaseActivity() {
 
     }
 
+
+    private fun checkPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) ==
+            PackageManager.PERMISSION_DENIED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                1001
+            )
+        }
+    }
 }
