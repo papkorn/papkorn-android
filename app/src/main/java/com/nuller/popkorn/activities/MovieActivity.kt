@@ -93,8 +93,8 @@ class MovieActivity : BaseActivity() {
         layoutMovie = findViewById(R.id.layout_movie)
 
         tabsAdapter = TabsAdapter(supportFragmentManager)
-        recyclerSimilarAdapter = MovieAdapter(similarMovies)
-        recyclerRecommendAdapter = MovieAdapter(recommendMovies)
+        recyclerSimilarAdapter = MovieAdapter(similarMovies,false)
+        recyclerRecommendAdapter = MovieAdapter(recommendMovies,false)
         recyclerSimilar.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         recyclerRecommend.layoutManager =

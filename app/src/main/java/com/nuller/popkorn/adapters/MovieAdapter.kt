@@ -12,7 +12,7 @@ import com.nuller.popkorn.R
 import com.nuller.popkorn.reponses.ResultsItem
 import com.squareup.picasso.Picasso
 
-class MovieAdapter(private val movies: List<ResultsItem>) :
+class MovieAdapter(private val movies: List<ResultsItem>, private val fullWidthMode: Boolean) :
     RecyclerView.Adapter<MovieAdapter.Holder>() {
 
     private lateinit var onClick: OnClick
@@ -33,9 +33,16 @@ class MovieAdapter(private val movies: List<ResultsItem>) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.row_movie, parent, false)
-        return Holder(view, onClick)
+        if (fullWidthMode) {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.row_movie, parent, false)
+            return Holder(view, onClick)
+        } else {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.row_movie2, parent, false)
+            return Holder(view, onClick)
+        }
+
     }
 
     @SuppressLint("SetTextI18n")
@@ -45,7 +52,7 @@ class MovieAdapter(private val movies: List<ResultsItem>) :
         holder.textMovieIMDB.text = movie.rate.toString()
         holder.textMovieYear.text = movie.year.toString()
         Picasso.get()
-            .load(movie.cover.replace("SY1200","SY300"))
+            .load(movie.cover.replace("SY1200", "SY300"))
             .into(holder.imageMovieCover)
         if (position == movies.size - 4) {
             onBottomReached.onReached()

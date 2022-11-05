@@ -38,8 +38,8 @@ class SearchActivity : BaseActivity() {
         recyclerSeries = findViewById(R.id.recycler_series)
         recyclerMovies.layoutManager = GridLayoutManager(context, 2)
         recyclerSeries.layoutManager = GridLayoutManager(context, 2)
-        movieAdapter = MovieAdapter(movies)
-        serieAdapter = MovieAdapter(series)
+        movieAdapter = MovieAdapter(movies,true)
+        serieAdapter = MovieAdapter(series,true)
         recyclerMovies.adapter = movieAdapter
         recyclerSeries.adapter = serieAdapter
 

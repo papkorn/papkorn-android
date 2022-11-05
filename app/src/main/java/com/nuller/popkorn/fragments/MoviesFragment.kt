@@ -35,7 +35,7 @@ class MoviesFragment() : BaseFragment(), OnClick, OnBottomReached {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_movies, container, false)
-        recyclerAdapter = MovieAdapter(movies)
+        recyclerAdapter = MovieAdapter(movies, true)
         recyclerMovies = view.findViewById(R.id.recycler_movies)
         recyclerMovies.layoutManager = GridLayoutManager(activity, 2)
         recyclerMovies.adapter = recyclerAdapter
