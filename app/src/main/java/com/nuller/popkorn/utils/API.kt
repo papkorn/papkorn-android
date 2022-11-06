@@ -9,10 +9,15 @@ interface API {
     companion object {
         //        const val BASE_URL = "https://api.papkornbot.ir/api/"
         const val BASE_URL = "https://api.pkdirectdl.xyz/api/"
-//        const val BASE_URL = "https://papkorn.3sigma.ir/api/"
+
+        //        const val BASE_URL = "https://papkorn.3sigma.ir/api/"
         const val ACCEPT_TYPE = "application/json"
         const val CSRF_TOKEN = "bnZyOewsJchpvDINhswdNZ8X02MmG4HWBl7LT1UKdUCKFFwCX9bulgTr9s6JtNWi"
     }
+
+    @GET("gemovies_app_version")
+    @Headers("accept:$ACCEPT_TYPE,X-CSRFToken:$CSRF_TOKEN")
+    fun getAppUpdates(): Call<ResponseAppUpdate>
 
     @GET("home_page/rows")
     @Headers("accept:$ACCEPT_TYPE,X-CSRFToken:$CSRF_TOKEN")
@@ -104,6 +109,6 @@ interface API {
     fun search(
         @Path("type") movieType: String,
         @Query("search") search: String
-    ) : Call<ResponseMovieByUrl>
+    ): Call<ResponseMovieByUrl>
 
 }

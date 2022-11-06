@@ -1,7 +1,11 @@
 package com.nuller.popkorn.activities
 
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -9,11 +13,13 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
+import cn.pedant.SweetAlert.SweetAlertDialog
 import com.google.android.material.tabs.TabLayout
 import com.nuller.popkorn.R
 import com.nuller.popkorn.ResponseHomePage
 import com.nuller.popkorn.adapters.TabsAdapter
 import com.nuller.popkorn.fragments.MoviesFragment
+import com.nuller.popkorn.reponses.ResponseAppUpdate
 import com.nuller.popkorn.utils.Params.Companion.TYPE_MOVIES
 import com.nuller.popkorn.utils.Params.Companion.TYPE_SERIES
 import okhttp3.HttpUrl
@@ -56,7 +62,43 @@ class MainActivity : BaseActivity(), View.OnClickListener {
         }
 
         getHomePage(type)
+        appUpdate()
 
+    }
+
+    private fun appUpdate() {
+        api.getAppUpdates()
+            .enqueue(object : Callback<ResponseAppUpdate> {
+                override fun onResponse(
+                    call: Call<ResponseAppUpdate>,
+                    response: Response<ResponseAppUpdate>
+                ) {
+                    val appUpdate = response.body()!!
+                    if (appUpdate.isForce!!) {
+
+                        val alert = AlertDialog.Builder(context)
+                        alert.setTitle("بروزرسانی!")
+                        alert.setMessage("برای استفاده از برنامه لطفا نسخه جدید را نصب نمایید.")
+                        alert.setCancelable(false)
+                        alert.setPositiveButton(
+                            "باشه!"
+                        ) { p0, p1 ->
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(appUpdate.downloadLink)
+                                )
+                            )
+                        }
+                        alert.show()
+                    }
+
+                }
+
+                override fun onFailure(call: Call<ResponseAppUpdate>, t: Throwable) {
+                }
+
+            })
     }
 
     private fun getHomePage(type: String) {
